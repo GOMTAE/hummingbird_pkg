@@ -1,0 +1,5 @@
+<launch>
+    <rosparam command="load" file="$(find hummingbird_pkg)/config/hummingbird_ppo_params_3rotors.yaml" />
+    <!-- Launch the training system -->
+    <node pkg="hummingbird_pkg" name="hummingbird_eval_3rotors" type="hummingbird_eval_3rotors.py" output="screen"/> -->
+</launch>
