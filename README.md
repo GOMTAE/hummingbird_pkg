@@ -13,11 +13,11 @@ Hummingbird_pkg cannot be used as a standalone package, it must be running withi
 
 For my Master Thesis, I have used **Hummingbird_pkg** to configure the environment settings for my training environment (e.g., terminal conditions, observations and actions). The schematics of the overall training environment is shown below:
 
-<img src="/assets/img/env.png" alt="Traning Environment" style="height: 800px; width:1200px;"/>
+<img src="/assets/img/env.png" alt="Traning Environment" style="height: 600px; width:1200px;"/>
 
 The trained controller can adjust itself to single rotor failure while hovering:
 
-<img src="assets/img/t5.gif" width="800" height="800" />
+<img src="assets/img/t5.gif" width="500" height="500" />
 
 Please refer to the thesis for further details:
 
