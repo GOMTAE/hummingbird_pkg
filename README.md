@@ -26,8 +26,7 @@ If you are willing to cite this research for your publication, please cite:
 ```bibtex
 @masterthesis{Kim2022,
     author = {Kim, Taehyoung and Armanini, Sophie},
-    institution = {Technical University of Munich},
-    type = {diplomathesis}, 
+    school = {Technical University of Munich}, 
     title = {Fault-Tolerant Quadrotor Controller Design Using Deep Reinforcement Learning},
     year = {2022},
 }
