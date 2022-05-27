@@ -33,21 +33,21 @@ from typing import Callable
 import hummingbird_hover_task_env_ppo_3rotors
 
 # ROS ENV gets started automatically before the training
-# from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment -- This has to be solved at the end
+# from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment -- Not implemented
 
 # change the directory
-os.chdir('/home/ubuntu/catkin_ws/src/hummingbird_pkg/')
+os.chdir('/home/ubuntu/catkin_ws/src/hummingbird_pkg/') # Change directory
 rospy.init_node('hummingbird_training_ppo_3rotors', anonymous=True, log_level=rospy.FATAL)
 
 # check log directory
-log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/"
+log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/" # Change directory
 os.makedirs(log_dir, exist_ok=True)
 
 # Create the Gym environment
 environment_name = rospy.get_param('/hummingbird/task_and_robot_environment_name')
 env = gym.make(environment_name)
 env = DummyVecEnv([lambda: Monitor(env, log_dir)])
-env = VecNormalize.load(log_dir + "baseline_26.pkl", env)
+env = VecNormalize.load(log_dir + "PPO_final.pkl", env)
 
 # rospy.loginfo("Gym environment done")
 # Set the logging system
@@ -55,17 +55,18 @@ rospack = rospkg.RosPack()
 pkg_path = rospack.get_path('hummingbird_pkg')
 outdir = pkg_path + '/training_results'
 
-# Save a checkpoint every 1000 steps
+# Save a checkpoint every 100k steps
 checkpoint_callback = CheckpointCallback(save_freq=100000, save_path='/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/checkpoint/3rotors/PPO',
-                                         name_prefix='ppo_model')
+                                         name_prefix='ppo_model') # Change directory
+
+# Continue learning for extra 5mil timesteps
 TIMESTEPS = 5000000
-    # # env = wrappers.Monitor(env, outdir, force=True)
-    # # rospy.loginfo("Monitor Wrapper started")
 
 # Load baseline
-baseline = PPO.load(log_dir + "baseline_26", tensorboard_log="/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/tensorboard_logs/PPO/3rotors/")
+baseline = PPO.load(log_dir + "PPO_final", tensorboard_log="/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/tensorboard_logs/PPO/3rotors/") # Change directory
 baseline.set_env(env)
 
+# Linear decay your learning rate
 def linear_schedule(initial_value: float) -> Callable[[float], float]:
     """
     Linear learning rate schedule.
@@ -107,46 +108,13 @@ algo_list = [
              # 'SAC'
              ]
 
-# rate = rospy.Rate(10)
-# training_time_list = []
-# model = PPO.load('/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model_PPO.zip', env=env)
-# mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=10)
-# print(mean_reward)
-# print(std_reward)
-# Enjoy trained agent
-# obs = env.reset()
-# for i in range(1000):
-#     action, _states = model.predict(obs, deterministic=False)
-#     obs, rewards, done, info = env.step(action)
-#     print(obs)
-#     print(rewards)
-#     print(action)
-# env.close()
-
-# model.set_env(env)
-# print(model)
-# start = time.time()
-# model.learn(total_timesteps=TIMESTEPS)
-# end = time.time()
-# training_time_list.append((end - start) * 1000)
-# model.save("/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model" + "_" + PPO_1M)
-#
-# obs = env.reset()
-# for i in range(1000):
-#     if i % 100 == 0:
-#         print(i)
-#     action, _states = model.predict(obs)
-#     obs, reward, done, info = env.step(action)
-#
-# env.close()
-
 training_time_list = []
 training_hp_list = []
 for model, algo in zip(model_list, algo_list):
     print(model)
 
     # Don't forget to save the VecNormalize statistics when saving the agent
-    log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/"
+    log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/" # Change directory
 
     start = time.time()
     model.learn(total_timesteps=TIMESTEPS, callback=checkpoint_callback)
@@ -159,6 +127,6 @@ for model, algo in zip(model_list, algo_list):
     env.save(log_dir+algo+"_hummingbird_hover_vec_normalize_3rotor.pkl")
 
 df = pd.DataFrame(list(zip(algo_list, training_time_list, training_hp_list)), columns=['algo', 'train_time (ms)', 'hp (total_ts, n_steps, batch_size, policy_kwargs'])
-df.to_csv('/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/train_info.csv', index=False)
+df.to_csv('/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/train_info.csv', index=False) # Change directory
 
 env.close()

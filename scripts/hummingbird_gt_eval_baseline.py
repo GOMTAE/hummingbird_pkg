@@ -37,7 +37,7 @@ import hummingbird_hover_task_gt_env_ppo_baseline
 # from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment -- This has to be solved at the end
 
 # change the directory
-os.chdir('/home/ubuntu/catkin_ws/src/hummingbird_pkg/')
+os.chdir('/home/ubuntu/catkin_ws/src/hummingbird_pkg/') #change directory
 rospy.init_node('hummingbird_gt_eval_baseline', anonymous=True, log_level=rospy.FATAL)
 
 # Create the Gym environment
@@ -45,14 +45,42 @@ rospy.init_node('hummingbird_gt_eval_baseline', anonymous=True, log_level=rospy.
 environment_name = rospy.get_param('/hummingbird/task_and_robot_environment_name')
 env = gym.make(environment_name)
 
-# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/PPO_25/"
-log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/gt/PPO_2/"
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/gt/PPO_0/"  # Noisy / baseline gt
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/PPO_21/"  # Noisy / baseline 1factor
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/PPO_29/"  # Noisy / baseline 5factor
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/PPO_26/"  # Noisy / baseline 10factor
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/PPO_28/"  # Noisy / baseline 20factor
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/PPO_27/"  # Noisy / baseline 100factor
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/gt/PPO_0/"  # GT / baseline / -0.5
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/gt/PPO_1/"  # GT / baseline / -1
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/gt/PPO_3/"  # GT / baseline / -2
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_20/"  # Noisy / 3rotors
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_2/"  # GT / 3rotors
 
+###### versatile ######
+
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_5/"   # 100 / 50
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_8/"   # 350 / 100
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_10/"  # 150 / 100
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_12/"  # 250 / 100
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_13/"  # 350 / 100
+
+### noisy 3r ###
+
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_10/" # gt
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_20/" # f1
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_23/" # f5
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_24/" # f10
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_27/" # f10
+
+log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_Enjoy/" # enjoy
+
+# When calling model, make sure which env your drone is trained from
 # model = PPO.load(log_dir + "PPO_hummingbird_hover")
-model = PPO.load(log_dir + "PPO_hummingbird_hover")
+model = PPO.load(log_dir + "PPO_hummingbird_hover_3rotor")
 env = DummyVecEnv([lambda: Monitor(env)])
 # env = VecNormalize.load(log_dir + "PPO_hummingbird_hover_vec_normalize.pkl", env)
-env = VecNormalize.load(log_dir + "PPO_hummingbird_hover_vec_normalize.pkl", env)
+env = VecNormalize.load(log_dir + "PPO_hummingbird_hover_vec_normalize_3rotor.pkl", env)
 
 env.training = False
 

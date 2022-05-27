@@ -45,9 +45,25 @@ rospy.init_node('hummingbird_eval_3rotors', anonymous=True, log_level=rospy.FATA
 environment_name = rospy.get_param('/hummingbird/task_and_robot_environment_name')
 env = gym.make(environment_name)
 
-# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/PPO_25/"
-log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_17/"
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_10/"
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_21/"
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_22/"
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_5/"   # 100 / 50
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_8/"   # 350 / 100
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_10/"  # 150 / 100
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_12/"  # 250 / 100
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/baseline/PPO_24/"
 
+### noisy 3r ###
+
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/gt/PPO_10/" # gt
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_20/" # f1
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_23/" # f5
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_24/" # f10
+# log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_27/" # final
+log_dir = "/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/trained_model/3rotors/PPO_Enjoy/" # enjoy
+
+# When calling model, make sure which env your drone is trained from
 # model = PPO.load(log_dir + "PPO_hummingbird_hover")
 model = PPO.load(log_dir + "PPO_hummingbird_hover_3rotor")
 env = DummyVecEnv([lambda: Monitor(env)])

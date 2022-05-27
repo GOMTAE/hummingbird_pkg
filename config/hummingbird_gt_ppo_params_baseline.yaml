@@ -1,30 +1,18 @@
 hummingbird: #namespace
 
-  # A2C Parameters
-  nsteps: 50
-  total_timesteps: int(80e6)
-  vf_coef: 0.5
-  ent_coef: 0.01
-  max_grad_norm: 0.5
-  lr: 7e-4
-  lrschedule: 'linear'
-  epsilon: 1e-5
-  alpha: 0.99
-  gamma: 0.99
-  log_interval: 100
-
-  # If the running step is too large, then there will be a long time between 2 ctrl commans
-  # If the pos_step is too large, then the changes in position will be very abrupt
+  # If the running step is too large, then there will be a long time between 2 ctrl cmds
   running_step: 0.01 # amount of time the control will be executed
-  num_envs: 1
+  num_envs: 1 # We only could use single sim environment for the training
   #learning general params
-  n_actions: 4 # We have 4 actions, 4 rotor speed values / temporally we implement q learning -- if it is 1d 1 action
-  n_observations: 19 # We have 19 different observations
+  n_actions: 4 # We have 4 actions, 4 rotor speed values
+  n_observations: 19 # We have 19 different observations (POS / LINVEL / LINACC / ANG / ANGVEL / Rotor speed)
 
+  # Normalized action
   action:
     rpm_max: 1.0
     rpm_min: -1.0
 
+  # Env configuration
   init_motor_speed: 640
   range_motor_speed: 640
 
@@ -34,7 +22,7 @@ hummingbird: #namespace
     z: 0.0
   init_angular_turn_speed: 0.0 # Initial angular speed in which we start each episode
 
-  work_space: # 3D cube in which Drone is allowed to move
+  work_space: # 3D cube in which drone is allowed to move
     x_max: 5.0
     x_min: -5.0
     y_max: 5.0
@@ -53,10 +41,13 @@ hummingbird: #namespace
 
   desired_point_epsilon: 0.5 # Error acceptable to consider that it has reached the desired point
 
-  inside_boundary_reward: 10 # We give points for getting closer to the desired point
-  not_ending_point_reward: 20 # Points given if we just dont crash
-  inside_goal_reward: 50 # Points given when ending an episode successfully / inside goal
-  low_velocity_reward: 30 # Points given if drone has low velocity
+  reward:
+    Ca: 0.5 # Constant alive bonus
+    Cx: -0.008 # Positional penalty
+    Cv: -0.0001 # Velocity Penalty
+    Comega: -0.0003 # Angular velocity penalty
 
   task_and_robot_environment_name: 'HummingbirdHoverTaskEnvPPO-v3'
   ros_ws_abspath: '/home/ubuntu/catkin_ws'
+
+   # Dont forget to change the path

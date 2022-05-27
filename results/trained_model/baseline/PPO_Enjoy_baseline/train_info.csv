@@ -1,0 +1,2 @@
+algo,train_time (ms),"hp (total_ts, n_steps, batch_size, gae_lambda, policy_kwargs"
+PPO,41743611.7875576,"[<function linear_schedule.<locals>.func at 0x7f54b4ed7700>, 2048, 64, 0.94, {'net_arch': [{'pi': [256, 256], 'vf': [256, 256]}], 'log_std_init': -0.5}]"

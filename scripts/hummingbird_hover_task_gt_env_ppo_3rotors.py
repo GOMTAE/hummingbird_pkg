@@ -39,6 +39,8 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
         LoadYamlFileParamsTest(rospackage_name="hummingbird_pkg",
                                rel_path_from_package_to_file="config",
                                yaml_file_name="hummingbird_gt_ppo_params_3rotors.yaml")  ### Need change
+        # For evaluation
+        self.eval_counter = 0
 
         # Only variable needed to be set here
         self.num_envs = rospy.get_param('/hummingbird/num_envs')
@@ -88,7 +90,7 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
         # self.init_point = Float64()
         # self.init_point.data = rospy.get_param("/hummingbird/init_position")
 
-        # Get WorkSpace Cube Dimensions
+        # Get WorkSpace Dimensions
         self.work_space_x_max = rospy.get_param("/hummingbird/work_space/x_max")
         self.work_space_x_min = rospy.get_param("/hummingbird/work_space/x_min")
         self.work_space_y_max = rospy.get_param("/hummingbird/work_space/y_max")
@@ -161,10 +163,10 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
         rospy.logdebug("OBSERVATION SPACES TYPE===>" + str(self.observation_space))
 
         # Rewards (needs shaping)
-        self.inside_boundary_reward = rospy.get_param("/hummingbird/inside_boundary_reward")
-        self.not_ending_point_reward = rospy.get_param("/hummingbird/not_ending_point_reward")
-        self.inside_goal_reward = rospy.get_param("/hummingbird/inside_goal_reward")
-        self.low_velocity_reward = rospy.get_param("/hummingbird/low_velocity_reward")
+        self.Ca = rospy.get_param("/hummingbird/reward/Ca")
+        self.Cx = rospy.get_param("/hummingbird/reward/Cx")
+        self.Cv = rospy.get_param("/hummingbird/reward/Cv")
+        self.Comega = rospy.get_param("/hummingbird/reward/Comega")
 
         self.cumulated_steps = 0.0
 
@@ -226,11 +228,17 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
         motor_input = self.scale_action(action, min_motor_input, max_motor_input)
         motor_input = numpy.round(motor_input, 4)
         self.step_counter += 1
-        if self.step_counter > 100 + self.random_motor_failure * 50:
+        # if self.step_counter > 350 + self.random_motor_failure * 100: # Finetuning
+        #     motor_input[0] = 0
+        if self.step_counter > 500: # Finetuning
             motor_input[0] = 0
         self.move_motor(motor_input)
         rospy.sleep(self.running_step)  # wait for some time
         rospy.logdebug("END Set Action ==>" + str(action))
+        # eval loop
+        if self.step_counter == 950:
+            self.eval_counter += 1
+        print(self.eval_counter)
 
     def _get_obs(self):
         """
@@ -249,7 +257,7 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
 
         # gt_angular_acc = self.get_base_angular_acc() -- not using angular accerleration
 
-        # We get the orientation of the cube in RPY
+        # We get the orientation of the Drone in RPY
         roll, pitch, yaw = self.get_orientation_euler(gt_pose.orientation)
 
         # We simplify a bit the spatial grid to make learning faster (round up 5 digit)
@@ -287,8 +295,7 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
         The done can be done due to three reasons:
         1) It went outside the workspace
         2) It flipped due to a crash or something
-        3) It has reached the desired point
-        4) It has reached the max_episode_length
+        3) Timestep termination: Automatic (10s) -- max_episode_steps = 1000
         """
 
         episode_done = False
@@ -310,7 +317,7 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
         #     sonar_value)
         drone_flipped = self.drone_has_flipped(current_orientation)
         # has_reached_des_point = self.is_in_desired_position(current_position, self.desired_point_epsilon)
-        isout = self.is_out(current_position, current_distance, MAX_DISTANCE=5.1)
+        isout = self.is_out(current_position, current_distance, MAX_DISTANCE=3.5)
 
         # rospy.logwarn(">>>>>> DONE RESULTS <<<<<")
         # if not is_inside_workspace_now:
@@ -403,22 +410,22 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
         # # roll_discounted = (1 - max(abs(current_orientation.y), 0.0001)) ** (1 - max(current_distance, 0.1))
         # yaw_rate_discounted = (1 - max(abs(current_ang_velocity.z), 0.001)) ** (1 - max(current_distance, 0.01))
 
-        distance_reward = - current_distance * 8 * 1e-3
-        velocity_reward = - current_abs_velocity * 1e-4
+        distance_reward = current_distance * self.Cx
+        velocity_reward = current_abs_velocity * self.Cv
         # acceleration_reward = - current_abs_acceleration * 2 * 1e-4
         ang_vel = [current_ang_velocity.x, current_ang_velocity.y, 0]
         # motor_vel_reward = - numpy.linalg.norm(current_motor_vel) * 1e-6
-        ang_velocity_reward = - numpy.linalg.norm(ang_vel) * 3 * 1e-4
-        alive_reward = 0.5
+        ang_velocity_reward = numpy.linalg.norm(ang_vel) * self.Comega
+        alive_reward = self.Ca
 
-        re_w = [distance_reward, velocity_reward, ang_velocity_reward]
-        print(re_w)
+        # re_w = [distance_reward, velocity_reward, ang_velocity_reward]
+        # print(re_w)
 
         # if not done:
         #     reward += 100 * distance_discounted * z_discounted * yaw_rate_discounted * velocity_discounted
         if not done:
             reward += distance_reward + velocity_reward + ang_velocity_reward + alive_reward
-            if current_distance < 0.5:
+            if current_distance < 0.5: # can be inhanced?
                 reward += 0.5
             # if current_distance < 0.03:
             #     self.good_step_counter += 1
@@ -538,7 +545,7 @@ class HummingbirdHoverTaskEnv(hummingbird_hover_gt_env.HummingbirdHoverGtEnv):
 
         isout = False
 
-        if abs(current_position.x) >= 1 or abs(current_position.y) >= 1 or current_distance >= MAX_DISTANCE:
+        if abs(current_position.x) >= 10 or abs(current_position.y) >= 10 or current_distance >= MAX_DISTANCE: # Finetuning
             isout = True
 
         return isout

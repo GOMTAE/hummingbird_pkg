@@ -33,7 +33,7 @@ from typing import Callable
 import hummingbird_hover_task_gt_env_ppo_3rotors
 
 # ROS ENV gets started automatically before the training
-# from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment -- This has to be solved at the end
+# from openai_ros.openai_ros_common import StartOpenAI_ROS_Environment -- Not implemented
 
 # change the directory
 os.chdir('/home/ubuntu/catkin_ws/src/hummingbird_pkg/')
@@ -47,7 +47,7 @@ os.makedirs(log_dir, exist_ok=True)
 environment_name = rospy.get_param('/hummingbird/task_and_robot_environment_name')
 env = gym.make(environment_name)
 env = DummyVecEnv([lambda: Monitor(env, log_dir)])
-env = VecNormalize.load(log_dir + "PPO_0.pkl", env)
+env = VecNormalize.load(log_dir + "PPO_1.pkl", env)
 
 # rospy.loginfo("Gym environment done")
 # Set the logging system
@@ -58,14 +58,15 @@ outdir = pkg_path + '/training_results'
 # Save a checkpoint every 1000 steps
 checkpoint_callback = CheckpointCallback(save_freq=100000, save_path='/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/checkpoint/3rotors/gt/PPO',
                                          name_prefix='ppo_model')
+
+# Continue learning for extra 5mil timesteps
 TIMESTEPS = 5000000
-    # # env = wrappers.Monitor(env, outdir, force=True)
-    # # rospy.loginfo("Monitor Wrapper started")
 
 # Load baseline
-baseline = PPO.load(log_dir + "PPO_0", tensorboard_log="/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/tensorboard_logs/PPO/3rotors/gt/")
+baseline = PPO.load(log_dir + "PPO_1", tensorboard_log="/home/ubuntu/catkin_ws/src/hummingbird_pkg/results/tensorboard_logs/PPO/3rotors/gt/")
 baseline.set_env(env)
 
+# Linear decay your learning rate
 def linear_schedule(initial_value: float) -> Callable[[float], float]:
     """
     Linear learning rate schedule.
