@@ -36,7 +36,7 @@ If this project was helpful, don't hesitate to give this repo a star :D
 
 ## Dependencies Installation
 
-# ROS / ROTORS
+### ROS / ROTORS
 
 1. Install ROS initialize ROS noetic desktop full, additional ROS packages, catkin-tools, and wstool:
 
@@ -77,7 +77,7 @@ catkin init  # If you haven't done this before.
 catkin build
 ```
 
-# SB3 / OPENAI_ROS
+### SB3 / OPENAI_ROS
 Download and install
 
 ```
@@ -135,7 +135,7 @@ roslaunch hummingbird_pkg eval_3rotors.launch     # Trained versatile controller
 
 Please modify the path of the models to evaluate your own trained agents.
 
-**Please note**:  There is no parser implementation on our code. Therefore you have to manually change the path of the model you are calling for evaluation.
+> **Note**: There is no parser implementation on our code. Therefore you have to manually change the path of the model you are calling for evaluation.
 
 ## Acknowledgement
 I want to express my gratitude to many researchers who provided the simulator and package as open-source, making the research possible!
