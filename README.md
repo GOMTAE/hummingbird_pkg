@@ -87,7 +87,8 @@ pip install stable-baselines3[extra]
 git clone -b version2 https://bitbucket.org/theconstructcore/openai_ros.git
 ```
 > **Note** For the openai_ros package, don't forget to build it on your ws
-> **Note** Please add self.step_counter = 0 in robot_gazebo_env.py in Openai ros
+
+> **Note** Please add self.step_counter = 0 in robot_gazebo_env.py in Openai_ros
 
 ## Hummingbird_pkg Installation
 Please clone the repo and install it on your ws and build it:
