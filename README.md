@@ -34,22 +34,74 @@ If you are willing to cite this research for your publication, please cite:
 
 If this project was helpful, don't hesitate to give this repo a star :D
 
-## Installation
+## Dependencies Installation
 
-TO BE UPDATED
+# ROS / ROTORS
 
-```sh
-cd dillinger
-npm i
-node app
+1. Install ROS initialize ROS noetic desktop full, additional ROS packages, catkin-tools, and wstool:
+
+```
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install ros-noetic-desktop-full ros-noetic-joy ros-noetic-octomap-ros ros-noetic-mavlink python3-wstool python3-catkin-tools protobuf-compiler libgoogle-glog-dev ros-noetic-control-toolbox ros-noetic-mavros
+sudo apt-get install python3-pip
+sudo pip install -U rosdep
+sudo rosdep init
+rosdep update
+source /opt/ros/noetic/setup.bash
 ```
 
-For production environments...
+2. If you don't have ROS workspace set one:
 
-```sh
-npm install --production
-NODE_ENV=production node app
 ```
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/src
+catkin_init_workspace  # initialize your catkin workspace
+wstool init
+```
+
+3. Get the simulator and additional dependencies
+
+```
+cd ~/catkin_ws/src
+git clone https://github.com/ethz-asl/rotors_simulator.git
+git clone https://github.com/ethz-asl/mav_comm.git
+```
+
+3. Build your ws
+
+```
+cd ~/catkin_ws/
+catkin init  # If you haven't done this before.
+catkin build
+```
+
+# SB3 / OPENAI_ROS
+Download and install
+
+```
+# SB3
+pip install stable-baselines3[extra]
+# OPENAI_ROS
+git clone -b version2 https://bitbucket.org/theconstructcore/openai_ros.git
+```
+> **Note** For the openai_ros package, don't forget to build it on your ws
+> **Note** Please add self.step_counter = 0 in robot_gazebo_env.py in Openai ros
+
+## Hummingbird_pkg Installation
+Please clone the repo and install it on your ws and build it:
+
+```
+git clone https://github.com/GOMTAE/hummingbird_pkg.git
+```
+
+## Hummingbird_pkg Setup
+Please make sure that all necessary directories for the operation are specified correctly. If not, please change it.
+The files that you should change the directories are:
+- Config files in **config** folder (param.yaml file e.g. hummingbird_ppo_params_baseline.yaml)
+- evaluation scripts in **scripts** folder (e.g. hummingbird_eval_baseline.py)
+- training scripts in **scripts** folder (e.g. train_hummingbird_ppo_basline.py)
 
 ## Basic Usage
 In order to initiate the training, you first have to launch the simulation environment. The simulation environment can be initiated via following: 
@@ -63,10 +115,10 @@ We initialize the drone in airborne condition. You can of course change the init
 ### Traning the quadrotor to fly
 After launching the simulation environment, you can initialte the training
 ```
-$ roslaunch hummingbird_pkg start_training_gt_ppo_baseline.launch  # Train baseline controller on ground truth environment (no IMU noise)
-$ roslaunch hummingbird_pkg start_training_gt_ppo_3rotors.launch    # Continue traning Fault-tolerant case on ground truth environment (no IMU noise)
-$ roslaunch hummingbird_pkg start_training_ppo_baseline.launch        # Train baseline controller on noisy environment (IMU noise)
-$ roslaunch hummingbird_pkg start_training_ppo_3rotors.launch          # Continue traning Fault-tolerant case on noisy environment (IMU noise)
+roslaunch hummingbird_pkg start_training_gt_ppo_baseline.launch # Train baseline controller on ground truth environment (no IMU noise)
+roslaunch hummingbird_pkg start_training_gt_ppo_3rotors.launch  # Continue traning Fault-tolerant case on ground truth environment (no IMU noise)
+roslaunch hummingbird_pkg start_training_ppo_baseline.launch    # Train baseline controller on noisy environment (IMU noise)
+roslaunch hummingbird_pkg start_training_ppo_3rotors.launch     # Continue traning Fault-tolerant case on noisy environment (IMU noise)
 ```
 Please make sure to change the path before training. (yaml files in the **config** folder for the env configuration, and the training/evaluation scripts in the **scirpts** folder)
 
@@ -74,10 +126,10 @@ Please make sure to change the path before training. (yaml files in the **config
 The simulation environment must be initiated first. The one of the trained agent models are added for complete user journey.
 
 ```
-$ roslaunch hummingbird_pkg gt_eval_baseline.launch   # Trained versatile controller which works as a hovering and fault-tolerant controller
-$ roslaunch hummingbird_pkg gt_eval_3rotors.launch     # Trained versatile controller which works as a hovering and fault-tolerant controller
-$ roslaunch hummingbird_pkg eval_baseline.launch         # Hovering only (baseline)
-$ roslaunch hummingbird_pkg eval_3rotors.launch           # Trained versatile controller which works as a hovering and fault-tolerant controller
+roslaunch hummingbird_pkg gt_eval_baseline.launch # Trained versatile controller which works as a hovering and fault-tolerant controller
+roslaunch hummingbird_pkg gt_eval_3rotors.launch  # Trained versatile controller which works as a hovering and fault-tolerant controller
+roslaunch hummingbird_pkg eval_baseline.launch    # Hovering only (baseline)
+roslaunch hummingbird_pkg eval_3rotors.launch     # Trained versatile controller which works as a hovering and fault-tolerant controller
 ```
 
 Please modify the path of the models to evaluate your own trained agents.
